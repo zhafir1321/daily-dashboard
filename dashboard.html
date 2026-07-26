@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Daily Dashboard</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #181b22;
+    --panel-2: #1f2430;
+    --line: #2a2f3a;
+    --text: #e7eaf0;
+    --muted: #9aa3b2;
+    --accent: #6c8cff;
+    --green: #35c98a;
+    --red: #ff6b6b;
+    --amber: #ffc857;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.5;
+  }
+  header {
+    padding: 20px 24px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  header h1 { font-size: 20px; font-weight: 700; }
+  header .date { color: var(--muted); font-size: 14px; }
+  nav { display: flex; gap: 6px; padding: 12px 24px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  nav button {
+    background: transparent; color: var(--muted); border: none; padding: 8px 16px;
+    border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;
+  }
+  nav button.active { background: var(--panel-2); color: var(--text); }
+  nav button:hover { color: var(--text); }
+  main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+  .tab { display: none; }
+  .tab.active { display: block; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+  h2 { font-size: 16px; margin-bottom: 14px; }
+  input, select, textarea {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    padding: 9px 12px; border-radius: 8px; font-size: 14px; font-family: inherit; outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  button.btn {
+    background: var(--accent); color: #fff; border: none; padding: 9px 16px;
+    border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;
+  }
+  button.btn:hover { opacity: 0.9; }
+  button.btn.ghost { background: var(--panel-2); color: var(--text); }
+  button.btn.danger { background: transparent; color: var(--red); padding: 6px 10px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .grow { flex: 1; min-width: 140px; }
+
+  /* To-do */
+  .todo-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid var(--line); }
+  .todo-item:last-child { border-bottom: none; }
+  .todo-item input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--green); cursor: pointer; }
+  .todo-item.done .todo-text { text-decoration: line-through; color: var(--muted); }
+  .todo-text { flex: 1; }
+  .todo-meta { font-size: 12px; color: var(--muted); }
+  .pill { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+  .pill.high { background: rgba(255,107,107,.15); color: var(--red); }
+  .pill.medium { background: rgba(255,200,87,.15); color: var(--amber); }
+  .pill.low { background: rgba(53,201,138,.15); color: var(--green); }
+
+  /* Calendar */
+  .cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .cal-dow { text-align: center; font-size: 12px; color: var(--muted); font-weight: 600; padding: 6px 0; }
+  .cal-cell { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; min-height: 84px; padding: 6px; cursor: pointer; overflow: hidden; }
+  .cal-cell:hover { border-color: var(--accent); }
+  .cal-cell.empty { background: transparent; border: none; cursor: default; }
+  .cal-cell.today { border-color: var(--accent); }
+  .cal-daynum { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .cal-cell.today .cal-daynum { color: var(--accent); font-weight: 700; }
+  .cal-ev { font-size: 11px; background: var(--accent); color: #fff; border-radius: 4px; padding: 1px 5px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Money */
+  .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  .summary .box { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .summary .box .label { font-size: 12px; color: var(--muted); }
+  .summary .box .val { font-size: 22px; font-weight: 700; margin-top: 4px; }
+  .val.pos { color: var(--green); } .val.neg { color: var(--red); }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  th { color: var(--muted); font-size: 12px; font-weight: 600; }
+  td.amt { text-align: right; font-variant-numeric: tabular-nums; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+  .tag.income { background: rgba(53,201,138,.15); color: var(--green); }
+  .tag.expense { background: rgba(255,107,107,.15); color: var(--red); }
+  .tag.recur { background: rgba(108,140,255,.15); color: var(--accent); }
+  .empty-state { color: var(--muted); text-align: center; padding: 24px; font-size: 14px; }
+  label.fld { font-size: 12px; color: var(--muted); display: block; margin-bottom: 4px; }
+  @media (max-width: 640px) { .summary { grid-template-columns: 1fr; } .cal-cell { min-height: 60px; } }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>My Daily Dashboard</h1>
+    <div class="date" id="todayLabel"></div>
+  </div>
+</header>
+<nav>
+  <button data-tab="todo" class="active">✓ To-Do</button>
+  <button data-tab="calendar">📅 Calendar</button>
+  <button data-tab="money">💰 Money</button>
+</nav>
+<main>
+  <!-- TO-DO -->
+  <section class="tab active" id="todo">
+    <div class="card">
+      <h2>Add a task</h2>
+      <div class="row">
+        <input class="grow" id="todoText" placeholder="What needs doing?" />
+        <input type="date" id="todoDue" />
+        <select id="todoPriority">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+        <button class="btn" onclick="addTodo()">Add</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between; margin-bottom:8px;">
+        <h2 style="margin:0;">Tasks</h2>
+        <select id="todoFilter" onchange="renderTodos()">
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="done">Completed</option>
+        </select>
+      </div>
+      <div id="todoList"></div>
+    </div>
+  </section>
+
+  <!-- CALENDAR -->
+  <section class="tab" id="calendar">
+    <div class="card">
+      <div class="cal-head">
+        <button class="btn ghost" onclick="shiftMonth(-1)">‹</button>
+        <h2 id="calTitle" style="margin:0;"></h2>
+        <button class="btn ghost" onclick="shiftMonth(1)">›</button>
+      </div>
+      <div class="cal-grid" id="calDow"></div>
+      <div class="cal-grid" id="calGrid" style="margin-top:6px;"></div>
+    </div>
+    <div class="card" id="dayPanel" style="display:none;">
+      <h2 id="dayPanelTitle"></h2>
+      <div class="row">
+        <input class="grow" id="evText" placeholder="Event or activity" />
+        <input type="time" id="evTime" />
+        <button class="btn" onclick="addEvent()">Add</button>
+      </div>
+      <div id="dayEvents" style="margin-top:12px;"></div>
+    </div>
+  </section>
+
+  <!-- MONEY -->
+  <section class="tab" id="money">
+    <div class="summary">
+      <div class="box"><div class="label">Income</div><div class="val pos" id="sumIncome">Rp 0</div></div>
+      <div class="box"><div class="label">Expenses</div><div class="val neg" id="sumExpense">Rp 0</div></div>
+      <div class="box"><div class="label">Balance</div><div class="val" id="sumBalance">Rp 0</div></div>
+    </div>
+    <div class="card">
+      <h2>Add transaction</h2>
+      <div class="row">
+        <select id="mType">
+          <option value="income">Income</option>
+          <option value="expense" selected>Expense</option>
+        </select>
+        <input class="grow" id="mDesc" placeholder="Description" />
+        <input class="grow" id="mCategory" placeholder="Category (e.g. Food)" />
+        <input id="mAmount" type="number" placeholder="Amount (Rp)" min="0" step="1000" />
+        <input type="date" id="mDate" />
+        <label style="display:flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;">
+          <input type="checkbox" id="mRecur" style="width:16px;height:16px;"/> Recurring
+        </label>
+        <select id="mRecurFreq" style="display:none;">
+          <option value="monthly">Monthly</option>
+          <option value="weekly">Weekly</option>
+          <option value="daily">Daily</option>
+        </select>
+        <button class="btn" onclick="addTxn()">Add</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Recurring items</h2>
+      <div id="recurList"></div>
+    </div>
+    <div class="card">
+      <h2>Transactions</h2>
+      <div id="txnList"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = n => "Rp " + (n||0).toLocaleString("id-ID");
+const todayISO = () => new Date().toISOString().slice(0,10);
+
+// ---- data (loaded from MySQL via the backend API) ----
+const DB = { todos: [], events: [], txns: [] };
+
+// generic API helper
+async function api(path, method="GET", body) {
+  const opt = { method, headers: {"Content-Type":"application/json"} };
+  if (body) opt.body = JSON.stringify(body);
+  const r = await fetch("/api"+path, opt);
+  if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error||("HTTP "+r.status)); }
+  return r.status===204 ? null : r.json();
+}
+async function loadTodos(){ DB.todos = await api("/todos"); }
+async function loadEvents(){ DB.events = await api("/events"); }
+async function loadTxns(){ DB.txns = await api("/txns"); }
+
+// ---- tabs ----
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+  b.classList.add("active");
+  $(b.dataset.tab).classList.add("active");
+});
+
+// ---- header date ----
+$("todayLabel").textContent = new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+
+/* ============ TO-DO ============ */
+async function addTodo() {
+  const text = $("todoText").value.trim();
+  if (!text) return;
+  await api("/todos","POST",{ text, due: $("todoDue").value||null, priority: $("todoPriority").value });
+  $("todoText").value = ""; $("todoDue").value = "";
+  await loadTodos(); renderTodos();
+}
+async function toggleTodo(id){ const t=DB.todos.find(x=>x.id===id);
+  await api("/todos/"+id,"PATCH",{ done: !t.done }); await loadTodos(); renderTodos(); }
+async function delTodo(id){ await api("/todos/"+id,"DELETE"); await loadTodos(); renderTodos(); }
+function renderTodos() {
+  const filter = $("todoFilter").value;
+  let list = DB.todos.slice();
+  if (filter==="active") list = list.filter(t=>!t.done);
+  if (filter==="done") list = list.filter(t=>t.done);
+  const order = {high:0,medium:1,low:2};
+  list.sort((a,b)=> (a.done-b.done) || (order[a.priority]-order[b.priority]) || ((a.due||"~").localeCompare(b.due||"~")));
+  const el = $("todoList");
+  if (!list.length){ el.innerHTML = '<div class="empty-state">No tasks yet.</div>'; return; }
+  el.innerHTML = list.map(t => `
+    <div class="todo-item ${t.done?'done':''}">
+      <input type="checkbox" ${t.done?'checked':''} onchange="toggleTodo('${t.id}')"/>
+      <div class="todo-text">${esc(t.text)}
+        <div class="todo-meta">${t.due?('Due '+t.due):'No due date'}</div>
+      </div>
+      <span class="pill ${t.priority}">${t.priority}</span>
+      <button class="btn danger" onclick="delTodo('${t.id}')">✕</button>
+    </div>`).join("");
+}
+
+/* ============ CALENDAR ============ */
+let calRef = new Date();
+let selectedDay = null;
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function shiftMonth(d){ calRef.setMonth(calRef.getMonth()+d); selectedDay=null; $("dayPanel").style.display="none"; renderCalendar(); }
+function renderCalendar() {
+  const y=calRef.getFullYear(), m=calRef.getMonth();
+  $("calTitle").textContent = calRef.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+  $("calDow").innerHTML = DOW.map(d=>`<div class="cal-dow">${d}</div>`).join("");
+  const first = new Date(y,m,1).getDay();
+  const days = new Date(y,m+1,0).getDate();
+  let cells = "";
+  for (let i=0;i<first;i++) cells += '<div class="cal-cell empty"></div>';
+  for (let d=1; d<=days; d++) {
+    const iso = `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const evs = DB.events.filter(e=>e.date===iso).sort((a,b)=>(a.time||"").localeCompare(b.time||""));
+    const isToday = iso===todayISO();
+    const shown = evs.slice(0,2).map(e=>`<div class="cal-ev">${e.time?e.time+' ':''}${esc(e.text)}</div>`).join("");
+    const more = evs.length>2 ? `<div class="todo-meta">+${evs.length-2} more</div>`:"";
+    cells += `<div class="cal-cell ${isToday?'today':''}" onclick="openDay('${iso}')">
+      <div class="cal-daynum">${d}</div>${shown}${more}</div>`;
+  }
+  $("calGrid").innerHTML = cells;
+}
+function openDay(iso){ selectedDay=iso; $("dayPanel").style.display="block";
+  $("dayPanelTitle").textContent = new Date(iso+"T00:00").toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+  $("evTime").value=""; $("evText").value=""; renderDayEvents(); }
+async function addEvent(){ if(!selectedDay) return; const text=$("evText").value.trim(); if(!text) return;
+  await api("/events","POST",{date:selectedDay, time:$("evTime").value||null, text});
+  $("evText").value=""; $("evTime").value=""; await loadEvents(); renderDayEvents(); renderCalendar(); }
+async function delEvent(id){ await api("/events/"+id,"DELETE"); await loadEvents(); renderDayEvents(); renderCalendar(); }
+function renderDayEvents(){
+  const evs = DB.events.filter(e=>e.date===selectedDay).sort((a,b)=>(a.time||"").localeCompare(b.time||""));
+  const el=$("dayEvents");
+  if(!evs.length){ el.innerHTML='<div class="empty-state">No events. Add one above.</div>'; return; }
+  el.innerHTML = evs.map(e=>`<div class="todo-item">
+    <div class="todo-text">${esc(e.text)}<div class="todo-meta">${e.time||"All day"}</div></div>
+    <button class="btn danger" onclick="delEvent('${e.id}')">✕</button></div>`).join("");
+}
+
+/* ============ MONEY ============ */
+$("mRecur").addEventListener("change", e => { $("mRecurFreq").style.display = e.target.checked ? "block":"none"; });
+async function addTxn(){
+  const amount = parseFloat($("mAmount").value);
+  const desc = $("mDesc").value.trim();
+  if(!desc || !amount || amount<=0){ alert("Enter a description and a valid amount."); return; }
+  await api("/txns","POST",{ type:$("mType").value, desc, category:$("mCategory").value.trim()||"Uncategorized",
+    amount, date:$("mDate").value||todayISO(),
+    recurring:$("mRecur").checked, freq:$("mRecur").checked?$("mRecurFreq").value:null });
+  $("mDesc").value=""; $("mCategory").value=""; $("mAmount").value=""; $("mDate").value=todayISO(); $("mRecur").checked=false; $("mRecurFreq").style.display="none";
+  await loadTxns(); renderMoney();
+}
+async function delTxn(id){ await api("/txns/"+id,"DELETE"); await loadTxns(); renderMoney(); }
+function renderMoney(){
+  const income = DB.txns.filter(t=>t.type==="income").reduce((s,t)=>s+t.amount,0);
+  const expense = DB.txns.filter(t=>t.type==="expense").reduce((s,t)=>s+t.amount,0);
+  $("sumIncome").textContent = fmt(income);
+  $("sumExpense").textContent = fmt(expense);
+  const bal = income-expense;
+  const be = $("sumBalance"); be.textContent = fmt(bal);
+  be.className = "val " + (bal>=0?"pos":"neg");
+
+  const recs = DB.txns.filter(t=>t.recurring);
+  $("recurList").innerHTML = recs.length ? tableHTML(recs, true) : '<div class="empty-state">No recurring items.</div>';
+
+  const sorted = DB.txns.slice().sort((a,b)=> (b.date||"").localeCompare(a.date||""));
+  $("txnList").innerHTML = sorted.length ? tableHTML(sorted, false) : '<div class="empty-state">No transactions yet.</div>';
+}
+function tableHTML(rows, isRecur){
+  return `<table><thead><tr><th>Date</th><th>Description</th><th>Category</th><th></th>${isRecur?'<th>Frequency</th>':''}<th style="text-align:right;">Amount</th><th></th></tr></thead><tbody>`
+    + rows.map(t=>`<tr>
+        <td>${t.date}</td>
+        <td>${esc(t.desc)}</td>
+        <td>${esc(t.category)}</td>
+        <td><span class="tag ${t.type}">${t.type}</span>${t.recurring&&!isRecur?' <span class="tag recur">↻</span>':''}</td>
+        ${isRecur?`<td>${t.freq}</td>`:''}
+        <td class="amt" style="color:${t.type==='income'?'var(--green)':'var(--red)'}">${t.type==='income'?'+':'-'}${fmt(t.amount)}</td>
+        <td><button class="btn danger" onclick="delTxn('${t.id}')">✕</button></td>
+      </tr>`).join("") + `</tbody></table>`;
+}
+
+function esc(s){ return (s||"").replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// init — load everything from the database, then render
+$("mDate").value = todayISO();
+$("todoDue").value = "";
+renderCalendar(); // month grid renders immediately; events fill in after load
+(async () => {
+  try {
+    await Promise.all([loadTodos(), loadEvents(), loadTxns()]);
+    renderTodos(); renderCalendar(); renderMoney();
+  } catch (e) {
+    document.querySelector("main").insertAdjacentHTML("afterbegin",
+      `<div class="card" style="border-color:var(--red);color:var(--red)">
+       ⚠️ Can't reach the server. Start it with <b>npm start</b> and open
+       <b>http://localhost:3000</b> (not the file directly). <br><small>${esc(e.message)}</small></div>`);
+  }
+})();
+</script>
+</body>
+</html>

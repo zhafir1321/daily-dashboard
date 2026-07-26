@@ -1,0 +1,36 @@
+# ───────────────────────────────────────────────
+#  Secrets & environment — NEVER commit real .env
+#  (holds JWT secret, DB credentials, etc.)
+# ───────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Node / frontend ──
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# ── Go / backend ──
+tmp/
+bin/
+*.exe
+*.out
+/backend/backend
+/backend/main
+
+# ── Logs ──
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# ── OS / editor ──
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*.swo
