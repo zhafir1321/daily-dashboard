@@ -13,7 +13,11 @@ import { Input } from "./ui/input"
 import { useState } from "react"
 import { login } from "@/api/auth"
 
-export function LoginCard() {
+type LoginCardProps = {
+    onLoginSuccess?: (token: string) => void
+}
+
+export function LoginCard({ onLoginSuccess }: LoginCardProps) {
     const [email, setEmail] = useState<string>("")
     const [password, setPassword] = useState<string>("")
 
@@ -27,6 +31,9 @@ export function LoginCard() {
             if (response && response.token) {
                 console.log("Login successful. Token:", response.token)
                 localStorage.setItem("token", response.token)
+                if (onLoginSuccess) {
+                    onLoginSuccess(response.token)
+                }
             } else {
                 console.error("Login failed. Response:", response)
                 throw new Error("Login failed. No token received.")
