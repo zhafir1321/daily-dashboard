@@ -51,10 +51,12 @@ func main() {
 	baseLogger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).With().Timestamp().Logger().Level(zerolog.DebugLevel)
 	todoServiceLogger := baseLogger.With().Str("component", "Todo Service").Logger()
 	todoHandlerLogger := baseLogger.With().Str("component", "Todo Handler").Logger()
+	eventHandlerLogger := baseLogger.With().Str("component", "Event Handler").Logger()
 
 	// Initialize repositories
 	userRepository := repositories.NewUserRepository(client.DB)
 	todoRepository := repositories.NewTodoRepository(client.DB)
+	eventRepository := repositories.NewEventRepository(client.DB)
 
 	// Initialize middleware
 	middleware := middleware.NewMiddleware(userRepository, config.JWT.JWTSecret)
@@ -63,11 +65,13 @@ func main() {
 	userService := services.NewUserService(userRepository)
 	authService := services.NewAuthService(userRepository, config.JWT.JWTSecret)
 	todoService := services.NewTodoService(todoRepository, todoServiceLogger)
+	eventService := services.NewEventService(eventRepository, baseLogger)
 
 	// Pass services to handlers
 	userHandler := handlers.NewUserHandler(userService)
 	authHandler := handlers.NewAuthHandler(authService)
 	todoHandler := handlers.NewTodoHandler(todoService, todoHandlerLogger)
+	eventHandler := handlers.NewEventHandler(eventService, eventHandlerLogger)
 
 	cors := config.CorsNew()
 
@@ -79,6 +83,7 @@ func main() {
 
 	routes.RegisterPublicEndpoints(router, userHandler, middleware)
 	routes.RegisterTodoEndpoints(router, todoHandler, middleware)
+	routes.RegisterEventEndpoints(router, eventHandler, middleware)
 
 	server := serve.NewServer(log.Logger, router, config)
 	server.Serve()

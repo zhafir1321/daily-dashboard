@@ -24,6 +24,11 @@
       "key": "userId",
       "value": "1",
       "type": "string"
+    },
+    {
+      "key": "eventId",
+      "value": "1",
+      "type": "string"
     }
   ],
   "item": [
@@ -270,6 +275,116 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "users", "{{userId}}"]
             }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "Get All Events",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events"]
+            },
+            "description": "Protected. Returns only the logged-in user's events. Empty list returns []."
+          }
+        },
+        {
+          "name": "Get Event By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events", "{{eventId}}"]
+            },
+            "description": "Protected. 404 if it doesn't exist or belongs to another user."
+          }
+        },
+        {
+          "name": "Create Event (with time)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Team meeting\",\n  \"description\": \"Weekly sync\",\n  \"event_date\": \"2026-08-05\",\n  \"event_time\": \"14:30:00\"\n}"
+            },
+            "description": "Protected. A timed event."
+          }
+        },
+        {
+          "name": "Create Event (all-day, no time)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Public holiday\",\n  \"description\": \"Day off\",\n  \"event_date\": \"2026-08-17\"\n}"
+            },
+            "description": "Protected. event_time omitted -> should store null and return event_time: null."
+          }
+        },
+        {
+          "name": "Update Event",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events", "{{eventId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Team meeting (updated)\",\n  \"event_time\": \"15:00:00\"\n}"
+            },
+            "description": "Protected. Partial update — only provided fields change."
+          }
+        },
+        {
+          "name": "Delete Event",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events", "{{eventId}}"]
+            },
+            "description": "Protected. Only deletes if it belongs to the logged-in user."
           }
         }
       ]

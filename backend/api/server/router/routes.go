@@ -38,3 +38,14 @@ func RegisterTodoEndpoints(router *gin.Engine, todoHandlers *handlers.Todo, midd
 		api.DELETE("/todos/:id", todoHandlers.DeleteTodo)
 	}
 }
+
+func RegisterEventEndpoints(router *gin.Engine, eventHandlers *handlers.Event, middleware *middleware.Middleware) {
+	api := router.Group("/api").Use(middleware.Authentication())
+	{
+		api.GET("/events", eventHandlers.GetAllEvents)
+		api.GET("/events/:id", eventHandlers.GetEvent)
+		api.POST("/events", eventHandlers.CreateEvent)
+		api.PUT("/events/:id", eventHandlers.UpdateEvent)
+		api.DELETE("/events/:id", eventHandlers.DeleteEvent)
+	}
+}
