@@ -7,8 +7,6 @@ import { useEffect, useState } from "react"
 import { deleteTodo, getTodos, toggleTodoCompletion, toggleTodoIncompletion } from "@/api/todos"
 import { createTodo } from "@/api/todos"
 
-// This is the DESIGN/LAYOUT only. The logic is left as TODOs for you.
-// Before using: `npx shadcn@latest add checkbox`
 
 export type Todo = {
     id: string;
@@ -27,6 +25,7 @@ export function TodosView({ onLogout }: TodosViewProps) {
     const [todos, setTodos] = useState<Todo[]>([])
     const [newTitle, setNewTitle] = useState("")
     const [newDescription, setNewDescription] = useState("")
+    const [filter, setFilter] = useState<"all" | "completed" | "incomplete">("all")
 
 
     useEffect(() => {
@@ -40,7 +39,6 @@ export function TodosView({ onLogout }: TodosViewProps) {
     })
 
     const handleLogout = () => {
-        // Clear the authentication token
         localStorage.removeItem("token");
         onLogout?.();
     }
@@ -76,6 +74,15 @@ export function TodosView({ onLogout }: TodosViewProps) {
         loadTodos()
     }
 
+    let visibleTodos = todos
+    if (filter === "completed") {
+        visibleTodos = todos.filter((t) => t.completed)
+    }
+    if (filter === "incomplete") {
+        visibleTodos = todos.filter((t) => !t.completed)
+    }
+
+
     return (
         <Card className="w-full max-w-md">
             <CardHeader>
@@ -105,15 +112,39 @@ export function TodosView({ onLogout }: TodosViewProps) {
                     </div>
                 </form>
 
-                {todos.length === 0 && (
+                <div className="flex gap-1">
+                    <Button type="button" size="sm" variant={filter === "all" ? "secondary" : "ghost"} onClick={() => setFilter("all")}>
+                        All
+                    </Button>
+                    <Button type="button" size="sm" variant={filter === "completed" ? "secondary" : "ghost"} onClick={() => setFilter("completed")}>
+                        Completed
+                    </Button>
+                    <Button type="button" size="sm" variant={filter === "incomplete" ? "secondary" : "ghost"} onClick={() => setFilter("incomplete")}>
+                        Incomplete
+                    </Button>
+                </div>
+
+                {visibleTodos.length === 0 && filter === "all" && (
                     <p className="py-6 text-center text-sm text-muted-foreground">
                         No todos yet — add one above.
                     </p>
                 )}
 
+                {visibleTodos.length === 0 && filter === "completed" && (
+                    <p className="py-6 text-center text-sm text-muted-foreground">
+                        No completed todos.
+                    </p>
+                )}
+
+                {visibleTodos.length === 0 && filter === "incomplete" && (
+                    <p className="py-6 text-center text-sm text-muted-foreground">
+                        No incomplete todos.
+                    </p>
+                )}
+
                 {/* List */}
                 <div className="flex flex-col">
-                    {todos.map((todo) => (
+                    {visibleTodos.map((todo) => (
                         <div
                             key={todo.id}
                             className="flex items-start gap-3 border-t py-3 first:border-t-0"

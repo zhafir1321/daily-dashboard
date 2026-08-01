@@ -13,12 +13,6 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { register } from "@/api/auth"
 
-// LAYOUT ONLY. Wire up the logic yourself:
-// - state for each field (name, email, phone_number, password)
-// - value + onChange on each Input
-// - handleSubmit: preventDefault -> register(req) -> success flow
-// - "Log in" action -> switch back to login (onSwitchToLogin prop from App)
-
 export type RegisterReq = {
     email: string
     name: string
@@ -54,20 +48,18 @@ export function RegisterView({ onSwitchToLogin }: RegisterViewProps) {
     }
 
     return (
-        <Card className="w-full max-w-sm">
+        <Card className="w-full max-w-md">
             <CardHeader>
                 <CardTitle>Create your account</CardTitle>
                 <CardDescription>
                     Enter your details below to sign up
                 </CardDescription>
                 <CardAction>
-                    {/* TODO: onClick={onSwitchToLogin} */}
                     <Button variant="link" onClick={onSwitchToLogin}>Log in</Button>
                 </CardAction>
             </CardHeader>
 
             <CardContent>
-                {/* TODO: onSubmit={handleSubmit} */}
                 <form id="register-form" className="flex flex-col gap-4" onSubmit={handleSubmit}>
                     <div className="grid gap-2">
                         <Label htmlFor="name">Name</Label>

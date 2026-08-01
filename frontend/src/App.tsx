@@ -13,21 +13,15 @@ function App() {
     <>
       <div className="min-h-screen flex items-center justify-center">
         {token ? (
-          <div>
-            <TodosView onLogout={() => {
-              setToken(null)
-            }} />
-          </div>
+          <TodosView onLogout={() => {
+            setToken(null)
+          }} />
+        ) : authScreen === 'login' ? (
+          <LoginCard onLoginSuccess={(token) => {
+            setToken(token)
+          }} onSwitchToRegister={() => setAuthScreen('register')} />
         ) : (
-          <div>
-            {authScreen === 'login' ? (
-              <LoginCard onLoginSuccess={(token) => {
-                setToken(token)
-              }} onSwitchToRegister={() => setAuthScreen('register')} />
-            ) : (
-              <RegisterView onSwitchToLogin={() => setAuthScreen('login')} />
-            )}
-          </div>
+          <RegisterView onSwitchToLogin={() => setAuthScreen('login')} />
         )}
       </div>
     </>

@@ -45,7 +45,7 @@ export function LoginCard({ onLoginSuccess, onSwitchToRegister }: LoginCardProps
     }
 
     return (
-        <Card className="w-full max-w-sm">
+        <Card className="w-full max-w-md">
             <CardHeader>
                 <CardTitle>Login to your account</CardTitle>
                 <CardDescription>
