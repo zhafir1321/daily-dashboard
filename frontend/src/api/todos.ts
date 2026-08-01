@@ -9,7 +9,6 @@ export async function getTodos(): Promise<Todo[]> {
     },
   });
 
-  // console.log("Fetched todos:", response.todos); // Log the fetched todos for debugging
   return response.todos ?? [];
 }
 

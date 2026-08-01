@@ -48,7 +48,7 @@ export function RegisterView({ onSwitchToLogin }: RegisterViewProps) {
     }
 
     return (
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-sm">
             <CardHeader>
                 <CardTitle>Create your account</CardTitle>
                 <CardDescription>
