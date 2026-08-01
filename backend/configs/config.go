@@ -65,7 +65,7 @@ func (c *Config) CorsNew() gin.HandlerFunc {
 	allowedOrigin := GetEnvOrPanic(constants.EnvKeys.CorsAllowedOrigin)
 
 	return cors.New(cors.Config{
-		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
+		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodPatch},
 		AllowHeaders:     []string{constants.Headers.Origin, constants.Headers.ContentLength, constants.Headers.Authorization, constants.Headers.ContentType},
 		ExposeHeaders:    []string{constants.Headers.ContentLength},
 		AllowCredentials: true,

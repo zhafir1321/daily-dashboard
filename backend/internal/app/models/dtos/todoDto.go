@@ -41,6 +41,8 @@ type DeleteTodoResponse struct {
 }
 
 func (r *GetAllTodosResponse) MapTodosResponse(todos []*entities.Todo) {
+	r.Todos = []*TodoResponse{}
+
 	for _, todo := range todos {
 		todoResponse := &TodoResponse{
 			ID:          todo.ID,
