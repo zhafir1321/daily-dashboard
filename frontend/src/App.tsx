@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { LoginCard } from './components/LoginCard'
 import { TodosView } from './components/TodosView'
+import { RegisterView } from './components/RegisterView'
 
 function App() {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("token"))
+  const [authScreen, setAuthScreen] = useState<'login' | 'register'>('login')
 
 
 
@@ -17,7 +19,15 @@ function App() {
             }} />
           </div>
         ) : (
-          <LoginCard onLoginSuccess={setToken} />
+          <div>
+            {authScreen === 'login' ? (
+              <LoginCard onLoginSuccess={(token) => {
+                setToken(token)
+              }} onSwitchToRegister={() => setAuthScreen('register')} />
+            ) : (
+              <RegisterView onSwitchToLogin={() => setAuthScreen('login')} />
+            )}
+          </div>
         )}
       </div>
     </>

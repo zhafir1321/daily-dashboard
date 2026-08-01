@@ -15,9 +15,10 @@ import { login } from "@/api/auth"
 
 type LoginCardProps = {
     onLoginSuccess?: (token: string) => void
+    onSwitchToRegister?: () => void
 }
 
-export function LoginCard({ onLoginSuccess }: LoginCardProps) {
+export function LoginCard({ onLoginSuccess, onSwitchToRegister }: LoginCardProps) {
     const [email, setEmail] = useState<string>("")
     const [password, setPassword] = useState<string>("")
 
@@ -51,7 +52,9 @@ export function LoginCard({ onLoginSuccess }: LoginCardProps) {
                     Enter your email below to login to your account
                 </CardDescription>
                 <CardAction>
-                    <Button variant="link">Sign Up</Button>
+                    <Button variant="link" onClick={onSwitchToRegister}>
+                        Sign Up
+                    </Button>
                 </CardAction>
             </CardHeader>
             <CardContent>
