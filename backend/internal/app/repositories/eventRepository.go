@@ -27,7 +27,7 @@ func mapEvents(rows *sql.Rows, e *entities.Event) error {
 func (r *Event) FindByID(id int, userID int) (*entities.Event, error) {
 	return r.SelectSingle(
 		mapEvent,
-		"SELECT id, title, description, event_date, event_time, user_id, created_at, updated_at FROM events WHERE id = $1 AND user_id = $2",
+		"SELECT id, title, description, TO_CHAR(event_date, 'YYYY-MM-DD') as event_date, TO_CHAR(event_time, 'HH24:MI') as event_time, user_id, created_at, updated_at FROM events WHERE id = $1 AND user_id = $2",
 		id,
 		userID,
 	)
@@ -36,7 +36,7 @@ func (r *Event) FindByID(id int, userID int) (*entities.Event, error) {
 func (r *Event) GetAllEvents(userID int) ([]*entities.Event, error) {
 	return r.SelectMultiple(
 		mapEvents,
-		"SELECT id, title, description, event_date, event_time, user_id, created_at, updated_at FROM events WHERE user_id = $1",
+		"SELECT id, title, description, TO_CHAR(event_date, 'YYYY-MM-DD') as event_date, TO_CHAR(event_time, 'HH24:MI') as event_time, user_id, created_at, updated_at FROM events WHERE user_id = $1",
 		userID,
 	)
 }

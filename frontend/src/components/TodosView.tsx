@@ -15,28 +15,10 @@ import { Trash2, Plus, LogOut, Pencil } from "lucide-react"
 import { useEffect, useState } from "react"
 import { deleteTodo, getTodos, toggleTodoCompletion, toggleTodoIncompletion, updateTodo } from "@/api/todos"
 import { createTodo } from "@/api/todos"
+import type { CreateTodoRequest, Todo, UpdateTodoRequest } from "@/types/todo"
 
 
-export type Todo = {
-    id: string;
-    title: string;
-    description: string;
-    completed: boolean;
-    created_at: string;
-    updated_at: string;
-}
-
-export type EditTodo = {
-    id: string;
-    title: string;
-    description: string;
-}
-
-type TodosViewProps = {
-    onLogout?: () => void
-}
-
-export function TodosView({ onLogout }: TodosViewProps) {
+export function TodosView() {
     const [todos, setTodos] = useState<Todo[]>([])
     const [newTitle, setNewTitle] = useState("")
     const [newDescription, setNewDescription] = useState("")
@@ -56,16 +38,15 @@ export function TodosView({ onLogout }: TodosViewProps) {
         setTodos(fetchedTodos)
     })
 
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        onLogout?.();
-    }
-
     const handleAddTodo = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         try {
             console.log("Adding todo:", newTitle, newDescription)
-            await createTodo(newTitle, newDescription)
+            const newTodo: CreateTodoRequest = {
+                title: newTitle,
+                description: newDescription
+            };
+            await createTodo(newTodo)
             loadTodos()
             setNewTitle("")
             setNewDescription("")
@@ -96,7 +77,11 @@ export function TodosView({ onLogout }: TodosViewProps) {
         e.preventDefault()
         if (editingTodo) {
             console.log("Editing todo:", editingTodo.id, editTitle, editDescription)
-            await updateTodo(editingTodo.id, editTitle, editDescription)
+            const updateRequest: UpdateTodoRequest = {
+                title: editTitle,
+                description: editDescription
+            };
+            await updateTodo(editingTodo.id, updateRequest)
             loadTodos()
             setEditingTodo(null)
         }
@@ -122,10 +107,6 @@ export function TodosView({ onLogout }: TodosViewProps) {
                                 {remaining} of {todos.length} remaining
                             </p>
                         </div>
-                        <Button variant="ghost" size="sm" onClick={handleLogout}>
-                            <LogOut className="mr-1 size-4" />
-                            Logout
-                        </Button>
                     </div>
                 </CardHeader>
 
@@ -202,8 +183,6 @@ export function TodosView({ onLogout }: TodosViewProps) {
                                     </p>
                                 </div>
 
-                                {/* Edit button — TODO: onClick opens the dialog with this todo pre-filled:
-                                setEditingTodo(todo); setEditTitle(todo.title); setEditDescription(todo.description) */}
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -231,12 +210,6 @@ export function TodosView({ onLogout }: TodosViewProps) {
                     </div>
                 </CardContent>
             </Card>
-
-            {/* Edit dialog — LAYOUT ONLY. Wire up:
-            - const [editingTodo, setEditingTodo] = useState<Todo | null>(null)
-            - const [editTitle, setEditTitle] = useState(""); const [editDescription, setEditDescription] = useState("")
-            - each row's edit button: setEditingTodo(todo) + prefill the two fields
-            - handleEditSubmit: preventDefault -> updateTodo(editingTodo.id, editTitle, editDescription) -> loadTodos() -> setEditingTodo(null) */}
             <Dialog open={editingTodo !== null} onOpenChange={(open) => { if (!open) setEditingTodo(null) }}>
                 <DialogContent>
                     <DialogHeader>

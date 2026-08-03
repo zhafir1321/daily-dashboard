@@ -106,9 +106,7 @@ func (es *Event) UpdateEvent(eventID int, eventReq *dtos.UpdateEventRequest, use
 		existingEvent.EventDate = eventReq.EventDate
 	}
 
-	if eventReq.EventTime != nil {
-		existingEvent.EventTime = eventReq.EventTime
-	}
+	existingEvent.EventTime = eventReq.EventTime
 
 	err := es.eventRepository.UpdateEvent(existingEvent)
 	if err != nil {

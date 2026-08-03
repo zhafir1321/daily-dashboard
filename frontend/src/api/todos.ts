@@ -1,4 +1,4 @@
-import type { Todo } from "@/components/TodosView";
+import type { CreateTodoRequest, Todo, UpdateTodoRequest } from "@/types/todo";
 import { apiFetcher } from "../lib/apiClient";
 
 export async function getTodos(): Promise<Todo[]> {
@@ -22,31 +22,27 @@ export async function getTodoById(id: string): Promise<Todo> {
   return response;
 }
 
-export async function createTodo(
-  title: string,
-  description: string,
-): Promise<any> {
+export async function createTodo(todoRequest: CreateTodoRequest): Promise<any> {
   const response = await apiFetcher("/api/todos", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ title, description }),
+    body: JSON.stringify(todoRequest),
   });
   return response;
 }
 
 export async function updateTodo(
   id: string,
-  title?: string,
-  description?: string,
+  updateRequest: UpdateTodoRequest,
 ): Promise<any> {
   const response = await apiFetcher(`/api/todos/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ title, description }),
+    body: JSON.stringify(updateRequest),
   });
   return response;
 }
