@@ -52,11 +52,14 @@ func main() {
 	todoServiceLogger := baseLogger.With().Str("component", "Todo Service").Logger()
 	todoHandlerLogger := baseLogger.With().Str("component", "Todo Handler").Logger()
 	eventHandlerLogger := baseLogger.With().Str("component", "Event Handler").Logger()
+	transactionServiceLogger := baseLogger.With().Str("component", "Transaction Service").Logger()
+	transactionHandlerLogger := baseLogger.With().Str("component", "Transaction Handler").Logger()
 
 	// Initialize repositories
 	userRepository := repositories.NewUserRepository(client.DB)
 	todoRepository := repositories.NewTodoRepository(client.DB)
 	eventRepository := repositories.NewEventRepository(client.DB)
+	transactionRepository := repositories.NewTransactionRepository(client.DB)
 
 	// Initialize middleware
 	middleware := middleware.NewMiddleware(userRepository, config.JWT.JWTSecret)
@@ -66,12 +69,14 @@ func main() {
 	authService := services.NewAuthService(userRepository, config.JWT.JWTSecret)
 	todoService := services.NewTodoService(todoRepository, todoServiceLogger)
 	eventService := services.NewEventService(eventRepository, baseLogger)
+	transactionService := services.NewTransactionService(transactionRepository, transactionServiceLogger)
 
 	// Pass services to handlers
 	userHandler := handlers.NewUserHandler(userService)
 	authHandler := handlers.NewAuthHandler(authService)
 	todoHandler := handlers.NewTodoHandler(todoService, todoHandlerLogger)
 	eventHandler := handlers.NewEventHandler(eventService, eventHandlerLogger)
+	transactionHandler := handlers.NewTransactionHandler(transactionService, transactionHandlerLogger)
 
 	cors := config.CorsNew()
 
@@ -84,6 +89,7 @@ func main() {
 	routes.RegisterPublicEndpoints(router, userHandler, middleware)
 	routes.RegisterTodoEndpoints(router, todoHandler, middleware)
 	routes.RegisterEventEndpoints(router, eventHandler, middleware)
+	routes.RegisterTransactionEndpoints(router, transactionHandler, middleware)
 
 	server := serve.NewServer(log.Logger, router, config)
 	server.Serve()

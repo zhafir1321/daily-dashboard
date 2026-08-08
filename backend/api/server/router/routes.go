@@ -49,3 +49,15 @@ func RegisterEventEndpoints(router *gin.Engine, eventHandlers *handlers.Event, m
 		api.DELETE("/events/:id", eventHandlers.DeleteEvent)
 	}
 }
+
+func RegisterTransactionEndpoints(router *gin.Engine, transactionHandlers *handlers.Transaction, middleware *middleware.Middleware) {
+	api := router.Group("/api").Use(middleware.Authentication())
+	{
+		api.GET("/transactions", transactionHandlers.GetTransactions)
+		api.GET("/transactions/summary", transactionHandlers.GetSummary)
+		api.GET("/transactions/:id", transactionHandlers.GetTransaction)
+		api.POST("/transactions", transactionHandlers.CreateTransaction)
+		api.PUT("/transactions/:id", transactionHandlers.UpdateTransaction)
+		api.DELETE("/transactions/:id", transactionHandlers.DeleteTransaction)
+	}
+}

@@ -11,7 +11,7 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Trash2, Plus, LogOut, Pencil } from "lucide-react"
+import { Trash2, Plus, Pencil } from "lucide-react"
 import { useEffect, useState } from "react"
 import { deleteTodo, getTodos, toggleTodoCompletion, toggleTodoIncompletion, updateTodo } from "@/api/todos"
 import { createTodo } from "@/api/todos"

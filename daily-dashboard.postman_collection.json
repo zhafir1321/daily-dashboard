@@ -29,6 +29,11 @@
       "key": "eventId",
       "value": "1",
       "type": "string"
+    },
+    {
+      "key": "transactionId",
+      "value": "1",
+      "type": "string"
     }
   ],
   "item": [
@@ -383,6 +388,131 @@
               "raw": "{{baseUrl}}/api/events/{{eventId}}",
               "host": ["{{baseUrl}}"],
               "path": ["api", "events", "{{eventId}}"]
+            },
+            "description": "Protected. Only deletes if it belongs to the logged-in user."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Get Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "summary"]
+            },
+            "description": "Protected. Returns { income, expense, balance }. Must NOT be caught by /transactions/:id — should return the summary, not a 400."
+          }
+        },
+        {
+          "name": "Get All Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "Protected. Only the logged-in user's transactions. Empty list returns []."
+          }
+        },
+        {
+          "name": "Get Transaction By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/{{transactionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "{{transactionId}}"]
+            },
+            "description": "Protected. 404 if it doesn't exist or belongs to another user."
+          }
+        },
+        {
+          "name": "Create Transaction (income)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"income\",\n  \"amount\": \"1500.00\",\n  \"description\": \"Salary\",\n  \"category\": \"salary\",\n  \"transaction_date\": \"2026-08-03\"\n}"
+            },
+            "description": "Protected. amount is a string (NUMERIC)."
+          }
+        },
+        {
+          "name": "Create Transaction (expense)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"expense\",\n  \"amount\": \"250.50\",\n  \"description\": \"Groceries\",\n  \"category\": \"food\",\n  \"transaction_date\": \"2026-08-03\"\n}"
+            },
+            "description": "Protected. After this + the income one, Summary balance should be 1249.50."
+          }
+        },
+        {
+          "name": "Update Transaction",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/{{transactionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "{{transactionId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"300.00\",\n  \"category\": \"transport\"\n}"
+            },
+            "description": "Protected. Partial update — only provided fields change."
+          }
+        },
+        {
+          "name": "Delete Transaction",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/{{transactionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "{{transactionId}}"]
             },
             "description": "Protected. Only deletes if it belongs to the logged-in user."
           }
