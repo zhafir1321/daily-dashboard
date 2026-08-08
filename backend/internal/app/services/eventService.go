@@ -32,7 +32,6 @@ func (es *Event) GetAllEvents(userID int) (*dtos.GetAllEventsResponse, *models.E
 		}
 	}
 
-	es.logger.Debug().Any("events", queriedEvents).Msg("this is response")
 	response.MapEventsResponse(queriedEvents)
 	response.Message = "Events retrieved successfully"
 	return response, nil

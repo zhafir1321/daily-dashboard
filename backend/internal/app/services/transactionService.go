@@ -72,7 +72,6 @@ func (ts *Transaction) GetAllTransactions(userID int) (*dtos.GetAllTransactionsR
 		}
 	}
 
-	ts.logger.Debug().Any("transactions", queriedTransactions).Msg("this is response")
 	response.MapTransactionsResponse(queriedTransactions)
 	response.Message = "Transactions retrieved successfully"
 	return response, nil

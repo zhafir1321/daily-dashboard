@@ -15,15 +15,6 @@ import type { CreateTransactionRequest, SummaryResponse, Transaction, Transactio
 import { useEffect, useState } from "react"
 import { createTransaction, deleteTransaction, getSummary, getTransactions, updateTransaction } from "@/api/transactions"
 
-// LAYOUT ONLY. You wire the logic (mirror EventsView) + the summary:
-//   Create src/types/transaction.ts:
-//     export type Transaction = { id, user_id, type: "income" | "expense", amount, description, category, transaction_date, created_at, updated_at }
-//     export type Summary = { total_income: string; total_expense: string; balance: string }
-//   Create src/api/transactions.ts: CRUD (mirror events) + getSummary() -> return response.data (the wrapper)
-//   State: transactions, summary, new{Type,Amount,Description,Category,Date}, editing + edit fields
-//   loadTransactions() + loadSummary(): call BOTH in useEffect and after every add/edit/delete (balance changes!)
-//   handleAdd/handleEdit: build the request (amount is a STRING), call api, reload both, clear/close
-
 export function TransactionsView() {
     const [transactions, setTransactions] = useState<Transaction[]>([])
     const [summary, setSummary] = useState<SummaryResponse>({
@@ -132,7 +123,6 @@ export function TransactionsView() {
             <Card className="w-full max-w-md">
                 <CardContent className="flex flex-col gap-4 pt-6">
                     <form className="flex flex-col gap-2" onSubmit={handleAdd}>
-                        {/* Type toggle — TODO: variant active when newType matches; onClick sets newType */}
                         <div className="flex gap-1">
                             <Button type="button" size="sm" variant={newType === 'income' ? "secondary" : "ghost"} className="flex-1" onClick={() => setNewType('income')}>Income</Button>
                             <Button type="button" size="sm" variant={newType === 'expense' ? "secondary" : "ghost"} className="flex-1" onClick={() => setNewType("expense")}>Expense</Button>
@@ -149,7 +139,6 @@ export function TransactionsView() {
                         </div>
                     </form>
 
-                    {/* Empty state — TODO: show when transactions.length === 0 */}
                     {transactions.length === 0 && (
                         <p className="py-6 text-center text-sm text-muted-foreground">
                             No transactions yet — add one above.
@@ -177,7 +166,6 @@ export function TransactionsView() {
                                     {transaction.type === "income" ? "+" : "-"}{transaction.amount}
                                 </p>
 
-                                {/* Edit — TODO: onClick sets editingTransaction + prefills edit fields */}
                                 <Button variant="ghost" size="icon" aria-label="Edit transaction" onClick={() => {
                                     setEditingTransaction(transaction)
                                     setEditType(transaction.type)
@@ -189,7 +177,6 @@ export function TransactionsView() {
                                     <Pencil className="size-4" />
                                 </Button>
 
-                                {/* Delete — TODO: onClick -> handleDelete(transaction.id) */}
                                 <Button variant="ghost" size="icon" aria-label="Delete transaction" className="text-destructive" onClick={() => handleDelete(transaction)}>
                                     <Trash2 className="size-4" />
                                 </Button>
@@ -199,9 +186,6 @@ export function TransactionsView() {
                 </CardContent>
             </Card>
 
-            {/* Edit dialog — LAYOUT ONLY. Wire up:
-                - const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
-                - edit fields state + handleEditSubmit: updateTransaction(id, {...}) -> reload both -> close */}
             <Dialog open={editingTransaction !== null} onOpenChange={(open) => { if (!open) setEditingTransaction(null) }}>
                 <DialogContent>
                     <DialogHeader>
@@ -209,7 +193,6 @@ export function TransactionsView() {
                         <DialogDescription>Update the details below.</DialogDescription>
                     </DialogHeader>
 
-                    {/* TODO: onSubmit={handleEditSubmit}; bind each input */}
                     <form id="edit-transaction-form" className="flex flex-col gap-4" onSubmit={handleEditSubmit}>
                         <div className="flex gap-1">
                             <Button type="button" size="sm" variant="secondary" className="flex-1" onClick={() => setEditType("income")}>Income</Button>

@@ -4,8 +4,10 @@ import (
 	"backend/internal/app/helpers"
 	"backend/internal/app/repositories"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
 )
 
 type Middleware struct {
@@ -47,5 +49,17 @@ func (m *Middleware) Authentication() gin.HandlerFunc {
 		c.Set("phone_number", claims.PhoneNumber)
 
 		c.Next()
+	}
+}
+
+func (m *Middleware) RequestLogger(logger zerolog.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+		c.Next()
+
+		status := c.Writer.Status()
+		latency := time.Since(start)
+
+		logger.Info().Str("method", c.Request.Method).Str("path", c.Request.URL.Path).Int("status", status).Dur("latency", latency).Msg("request")
 	}
 }

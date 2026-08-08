@@ -58,7 +58,6 @@ export function EventsView() {
         e.preventDefault()
         try {
             if (editingEvent) {
-                console.log("Editing event:", editingEvent.id)
                 const updatedEvent: UpdateEventRequest = {
                     title: editTitle,
                     description: editDescription,

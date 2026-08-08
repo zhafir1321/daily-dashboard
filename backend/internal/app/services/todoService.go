@@ -32,7 +32,6 @@ func (ts *Todo) GetAllTodos(userID int) (*dtos.GetAllTodosResponse, *models.Erro
 		}
 	}
 
-	ts.logger.Debug().Any("todos", queriedTodos).Msg("this is response")
 	response.MapTodosResponse(queriedTodos)
 	response.Message = "Todos retrieved successfully"
 	return response, nil

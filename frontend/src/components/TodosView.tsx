@@ -41,7 +41,6 @@ export function TodosView() {
     const handleAddTodo = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         try {
-            console.log("Adding todo:", newTitle, newDescription)
             const newTodo: CreateTodoRequest = {
                 title: newTitle,
                 description: newDescription
@@ -57,18 +56,15 @@ export function TodosView() {
 
     const handleToggle = async (todo: Todo) => {
         if (todo.completed) {
-            console.log("Toggling todo to incomplete:", todo.id)
             await toggleTodoIncompletion(todo.id)
         }
         if (!todo.completed) {
-            console.log("Toggling todo to complete:", todo.id)
             await toggleTodoCompletion(todo.id)
         }
         loadTodos()
     }
 
     const handleDelete = async (todo: Todo) => {
-        console.log("Deleting todo:", todo.id)
         await deleteTodo(todo.id)
         loadTodos()
     }
@@ -76,7 +72,6 @@ export function TodosView() {
     const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         if (editingTodo) {
-            console.log("Editing todo:", editingTodo.id, editTitle, editDescription)
             const updateRequest: UpdateTodoRequest = {
                 title: editTitle,
                 description: editDescription

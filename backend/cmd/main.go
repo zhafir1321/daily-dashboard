@@ -18,7 +18,7 @@ import (
 )
 
 func main() {
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).With().Timestamp().Logger().Level(zerolog.DebugLevel)
 
 	config := configs.NewConfig()
 
@@ -47,8 +47,9 @@ func main() {
 		return
 	}
 
-	// Initialize logger
-	baseLogger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).With().Timestamp().Logger().Level(zerolog.DebugLevel)
+	// Initialize logger — reuse the configured global logger for the injected ones
+	baseLogger := log.Logger
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	todoServiceLogger := baseLogger.With().Str("component", "Todo Service").Logger()
 	todoHandlerLogger := baseLogger.With().Str("component", "Todo Handler").Logger()
 	eventHandlerLogger := baseLogger.With().Str("component", "Event Handler").Logger()
@@ -80,7 +81,9 @@ func main() {
 
 	cors := config.CorsNew()
 
-	router := gin.Default()
+	router := gin.New()
+	router.Use(gin.Recovery())
+	router.Use(middleware.RequestLogger(baseLogger))
 	router.Use(cors)
 
 	// Register routes
@@ -90,6 +93,7 @@ func main() {
 	routes.RegisterTodoEndpoints(router, todoHandler, middleware)
 	routes.RegisterEventEndpoints(router, eventHandler, middleware)
 	routes.RegisterTransactionEndpoints(router, transactionHandler, middleware)
+	log.Logger = baseLogger
 
 	server := serve.NewServer(log.Logger, router, config)
 	server.Serve()

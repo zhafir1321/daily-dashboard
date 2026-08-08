@@ -24,13 +24,10 @@ export function LoginCard({ onLoginSuccess, onSwitchToRegister }: LoginCardProps
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        console.log("Email:", email)
-        console.log("Password:", password)
 
         try {
             const response = await login(email, password)
             if (response && response.token) {
-                console.log("Login successful. Token:", response.token)
                 localStorage.setItem("token", response.token)
                 if (onLoginSuccess) {
                     onLoginSuccess(response.token)
