@@ -23,7 +23,8 @@ export async function apiFetcher(
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || "API request failed");
+    console.log("API request failed:", data);
+    throw new Error(data.error || "API request failed");
   }
 
   return data;

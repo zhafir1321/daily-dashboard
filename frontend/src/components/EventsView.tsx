@@ -10,10 +10,11 @@ import {
     DialogDescription,
     DialogFooter,
 } from "@/components/ui/dialog"
-import { Trash2, Plus, Pencil, Calendar, Clock } from "lucide-react"
+import { Trash2, Plus, Pencil, Calendar, Clock, AlertCircle } from "lucide-react"
 import type { CreateEventRequest, Event, UpdateEventRequest } from "@/types/event"
 import { useEffect, useState } from "react"
 import { createEvent, deleteEvent, getEvents, updateEvent } from "@/api/events"
+import { Alert, AlertDescription } from "./ui/alert"
 
 export function EventsView() {
     const [newTitle, setNewTitle] = useState<string>("")
@@ -26,6 +27,9 @@ export function EventsView() {
     const [editDescription, setEditDescription] = useState<string>("")
     const [editDateEvent, setEditDateEvent] = useState<string>("")
     const [editDateTime, setEditDateTime] = useState<string>("")
+    const [error, setError] = useState<string | null>(null)
+    const [editError, setEditError] = useState<string | null>(null)
+
 
 
     useEffect(() => {
@@ -36,6 +40,7 @@ export function EventsView() {
 
     const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        setError(null)
         try {
             const eventRequest: CreateEventRequest = {
                 title: newTitle,
@@ -51,11 +56,13 @@ export function EventsView() {
             setNewDateTime("");
         } catch (error) {
             console.error("Error adding event:", error);
+            setError(error instanceof Error ? error.message : "An unknown error occurred.");
         }
     }
 
     const handleEdit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        setEditError(null)
         try {
             if (editingEvent) {
                 const updatedEvent: UpdateEventRequest = {
@@ -74,15 +81,18 @@ export function EventsView() {
             }
         } catch (error) {
             console.error("Error editing event:", error);
+            setEditError(error instanceof Error ? error.message : "An unknown error occurred.")
         }
     }
 
     const handleDelete = async (event: Event) => {
+        setError(null)
         try {
             await deleteEvent(event.id);
             await loadEvents();
         } catch (error) {
             console.error("Error deleting event:", error);
+            setError(error instanceof Error ? error.message : "An unknown error occurred.")
         }
     }
 
@@ -97,6 +107,14 @@ export function EventsView() {
                 </CardHeader>
 
                 <CardContent className="flex flex-col gap-4">
+                    {error && (
+                        <Alert variant="destructive" className="mt-2">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription className="ml-2">
+                                {error}
+                            </AlertDescription>
+                        </Alert>
+                    )}
                     <form className="flex flex-col gap-2" onSubmit={handleAdd}>
                         <Input placeholder="Event title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
                         <Input placeholder="Description" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} />
@@ -162,7 +180,14 @@ export function EventsView() {
                         <DialogTitle>Edit event</DialogTitle>
                         <DialogDescription>Update the details below.</DialogDescription>
                     </DialogHeader>
-
+                    {error && (
+                        <Alert variant="destructive" className="mt-2">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription className="ml-2">
+                                {error}
+                            </AlertDescription>
+                        </Alert>
+                    )}
                     <form id="edit-event-form" className="flex flex-col gap-4" onSubmit={handleEdit}>
                         <div className="grid gap-2">
                             <Label htmlFor="edit-event-title">Title</Label>

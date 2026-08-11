@@ -10,10 +10,12 @@ import {
     DialogDescription,
     DialogFooter,
 } from "@/components/ui/dialog"
-import { Trash2, Plus, Pencil } from "lucide-react"
+import { Trash2, Plus, Pencil, AlertCircle } from "lucide-react"
 import type { CreateTransactionRequest, SummaryResponse, Transaction, TransactionType, UpdateTransactionRequest } from "@/types/transaction"
 import { useEffect, useState } from "react"
 import { createTransaction, deleteTransaction, getSummary, getTransactions, updateTransaction } from "@/api/transactions"
+import { Alert, AlertDescription } from "./ui/alert"
+import { formatCurrency } from "@/lib/formatCurrency"
 
 export function TransactionsView() {
     const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -34,6 +36,8 @@ export function TransactionsView() {
     const [editDescription, setEditDescription] = useState<string>("")
     const [editCategory, setEditCategory] = useState<string>("")
     const [editTransactionDate, setEditTransactionDate] = useState<string>("")
+    const [error, setError] = useState<string | null>(null)
+    const [editError, setEditError] = useState<string | null>(null)
 
 
     useEffect(() => {
@@ -46,6 +50,7 @@ export function TransactionsView() {
 
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault()
+        setError(null)
         try {
             const transactionRequest: CreateTransactionRequest = {
                 type: newType,
@@ -64,11 +69,13 @@ export function TransactionsView() {
             setNewTransactionDate("")
         } catch (error) {
             console.error("Error adding transaction:", error)
+            setError(error instanceof Error ? error.message : "An unknown error occurred.")
         }
     }
 
     const handleEditSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        setEditError(null)
         try {
             if (editingTransaction) {
                 const updateRequest: UpdateTransactionRequest = {
@@ -89,16 +96,19 @@ export function TransactionsView() {
             }
         } catch (error) {
             console.error("Error editing transaction:", error)
+            setEditError(error instanceof Error ? error.message : "An unknown error occurred.")
         }
     }
 
     const handleDelete = async (transaction: Transaction) => {
+        setError(null)
         try {
             await deleteTransaction(transaction.id)
             loadTransactions()
             loadSummary()
         } catch (error) {
             console.error("Error deleting transaction:", error)
+            setError(error instanceof Error ? error.message : "An unknown error occurred.")
         }
     }
 
@@ -108,20 +118,28 @@ export function TransactionsView() {
             <div className="grid grid-cols-3 gap-2">
                 <div className="rounded-lg border p-3">
                     <p className="text-xs text-muted-foreground">Income</p>
-                    <p className="text-lg font-medium text-green-600">{summary.total_income}</p>
+                    <p className="text-lg font-medium text-green-600">{formatCurrency(summary.total_income)}</p>
                 </div>
                 <div className="rounded-lg border p-3">
                     <p className="text-xs text-muted-foreground">Expense</p>
-                    <p className="text-lg font-medium text-red-600">{summary.total_expense}</p>
+                    <p className="text-lg font-medium text-red-600">{formatCurrency(summary.total_expense)}</p>
                 </div>
                 <div className="rounded-lg border p-3">
                     <p className="text-xs text-muted-foreground">Balance</p>
-                    <p className="text-lg font-medium">{summary.balance}</p>
+                    <p className="text-lg font-medium">{formatCurrency(summary.balance)}</p>
                 </div>
             </div>
 
             <Card className="w-full max-w-md">
                 <CardContent className="flex flex-col gap-4 pt-6">
+                    {error && (
+                        <Alert variant="destructive" className="mt-2">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription className="ml-2">
+                                {error}
+                            </AlertDescription>
+                        </Alert>
+                    )}
                     <form className="flex flex-col gap-2" onSubmit={handleAdd}>
                         <div className="flex gap-1">
                             <Button type="button" size="sm" variant={newType === 'income' ? "secondary" : "ghost"} className="flex-1" onClick={() => setNewType('income')}>Income</Button>
@@ -163,7 +181,7 @@ export function TransactionsView() {
                                     "font-medium tabular-nums " +
                                     (transaction.type === "income" ? "text-green-600" : "text-red-600")
                                 }>
-                                    {transaction.type === "income" ? "+" : "-"}{transaction.amount}
+                                    {transaction.type === "income" ? "+" : "-"}{formatCurrency(transaction.amount)}
                                 </p>
 
                                 <Button variant="ghost" size="icon" aria-label="Edit transaction" onClick={() => {
@@ -192,7 +210,14 @@ export function TransactionsView() {
                         <DialogTitle>Edit transaction</DialogTitle>
                         <DialogDescription>Update the details below.</DialogDescription>
                     </DialogHeader>
-
+                    {error && (
+                        <Alert variant="destructive" className="mt-2">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription className="ml-2">
+                                {error}
+                            </AlertDescription>
+                        </Alert>
+                    )}
                     <form id="edit-transaction-form" className="flex flex-col gap-4" onSubmit={handleEditSubmit}>
                         <div className="flex gap-1">
                             <Button type="button" size="sm" variant="secondary" className="flex-1" onClick={() => setEditType("income")}>Income</Button>

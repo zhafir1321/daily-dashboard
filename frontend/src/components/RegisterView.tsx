@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { register } from "@/api/auth"
+import { Alert, AlertDescription } from "./ui/alert"
+import { AlertCircle } from "lucide-react"
 
 export type RegisterReq = {
     email: string
@@ -25,13 +27,15 @@ type RegisterViewProps = {
 }
 
 export function RegisterView({ onSwitchToLogin }: RegisterViewProps) {
-    const [name, setName] = useState("")
-    const [email, setEmail] = useState("")
-    const [phoneNumber, setPhoneNumber] = useState("")
-    const [password, setPassword] = useState("")
+    const [name, setName] = useState<string>("")
+    const [email, setEmail] = useState<string>("")
+    const [phoneNumber, setPhoneNumber] = useState<string>("")
+    const [password, setPassword] = useState<string>("")
+    const [error, setError] = useState<string | null>(null)
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        setError(null)
         try {
             const registerReq: RegisterReq = {
                 name,
@@ -42,7 +46,8 @@ export function RegisterView({ onSwitchToLogin }: RegisterViewProps) {
             await register(registerReq)
             onSwitchToLogin?.()
 
-        } catch (error) {
+        } catch (error: any) {
+            setError(error instanceof Error ? error.message : "An unknown error occurred.")
             console.error(error)
         }
     }
@@ -54,6 +59,14 @@ export function RegisterView({ onSwitchToLogin }: RegisterViewProps) {
                 <CardDescription>
                     Enter your details below to sign up
                 </CardDescription>
+                {error && (
+                    <Alert variant="destructive" className="mt-2">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription className="ml-2">
+                            {error}
+                        </AlertDescription>
+                    </Alert>
+                )}
                 <CardAction>
                     <Button variant="link" onClick={onSwitchToLogin}>Log in</Button>
                 </CardAction>

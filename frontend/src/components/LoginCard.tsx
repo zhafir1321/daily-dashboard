@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Input } from "./ui/input"
 import { useState } from "react"
 import { login } from "@/api/auth"
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert"
+import { AlertCircle } from "lucide-react"
 
 type LoginCardProps = {
     onLoginSuccess?: (token: string) => void
@@ -21,10 +23,11 @@ type LoginCardProps = {
 export function LoginCard({ onLoginSuccess, onSwitchToRegister }: LoginCardProps) {
     const [email, setEmail] = useState<string>("")
     const [password, setPassword] = useState<string>("")
+    const [error, setError] = useState<string | null>(null)
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-
+        setError(null)
         try {
             const response = await login(email, password)
             if (response && response.token) {
@@ -38,6 +41,7 @@ export function LoginCard({ onLoginSuccess, onSwitchToRegister }: LoginCardProps
             }
         } catch (error) {
             console.error("Login failed:", error)
+            setError(error instanceof Error ? error.message : "An unknown error occurred.")
         }
     }
 
@@ -55,6 +59,14 @@ export function LoginCard({ onLoginSuccess, onSwitchToRegister }: LoginCardProps
                 </CardAction>
             </CardHeader>
             <CardContent>
+                {error && (
+                    <Alert variant="destructive" className="mb-4">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription className="ml-2">
+                            {error}
+                        </AlertDescription>
+                    </Alert>
+                )}
                 <form id="login-form" className="grid gap-4" onSubmit={handleSubmit}>
                     <div className="flex flex-col gap-6">
                         <div className="grid gap-2">

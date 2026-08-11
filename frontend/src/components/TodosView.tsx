@@ -11,21 +11,28 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Trash2, Plus, Pencil } from "lucide-react"
+import { Trash2, Plus, Pencil, AlertCircle } from "lucide-react"
 import { useEffect, useState } from "react"
 import { deleteTodo, getTodos, toggleTodoCompletion, toggleTodoIncompletion, updateTodo } from "@/api/todos"
 import { createTodo } from "@/api/todos"
 import type { CreateTodoRequest, Todo, UpdateTodoRequest } from "@/types/todo"
+import { Alert, AlertDescription } from "./ui/alert"
 
 
 export function TodosView() {
     const [todos, setTodos] = useState<Todo[]>([])
-    const [newTitle, setNewTitle] = useState("")
-    const [newDescription, setNewDescription] = useState("")
+    const [newTitle, setNewTitle] = useState<string>("")
+    const [newDescription, setNewDescription] = useState<string>("")
     const [filter, setFilter] = useState<"all" | "completed" | "incomplete">("all")
     const [editingTodo, setEditingTodo] = useState<Todo | null>(null)
-    const [editTitle, setEditTitle] = useState("")
-    const [editDescription, setEditDescription] = useState("")
+    const [editTitle, setEditTitle] = useState<string>("")
+    const [editDescription, setEditDescription] = useState<string>("")
+
+    const [error, setError] = useState<string | null>(null)
+    const [editError, setEditError] = useState<string | null>(null)
+
+
+
 
 
     useEffect(() => {
@@ -40,6 +47,7 @@ export function TodosView() {
 
     const handleAddTodo = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        setError(null)
         try {
             const newTodo: CreateTodoRequest = {
                 title: newTitle,
@@ -51,34 +59,53 @@ export function TodosView() {
             setNewDescription("")
         } catch (error) {
             console.error("Error adding todo:", error)
+            setError(error instanceof Error ? error.message : "An unknown error occurred.")
         }
     }
 
     const handleToggle = async (todo: Todo) => {
-        if (todo.completed) {
-            await toggleTodoIncompletion(todo.id)
+        try {
+            if (todo.completed) {
+                await toggleTodoIncompletion(todo.id)
+            }
+            if (!todo.completed) {
+                await toggleTodoCompletion(todo.id)
+            }
+            loadTodos()
+        } catch (error) {
+            console.error("Error toggling todo completion:", error)
+            setError(error instanceof Error ? error.message : "An unknown error occurred.")
         }
-        if (!todo.completed) {
-            await toggleTodoCompletion(todo.id)
-        }
-        loadTodos()
     }
 
     const handleDelete = async (todo: Todo) => {
-        await deleteTodo(todo.id)
-        loadTodos()
+        setError(null)
+        try {
+            await deleteTodo(todo.id)
+            loadTodos()
+
+        } catch (error) {
+            console.error("Error deleting todo:", error)
+            setError(error instanceof Error ? error.message : "An unknown error occurred.")
+        }
     }
 
     const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        if (editingTodo) {
-            const updateRequest: UpdateTodoRequest = {
-                title: editTitle,
-                description: editDescription
-            };
-            await updateTodo(editingTodo.id, updateRequest)
-            loadTodos()
-            setEditingTodo(null)
+        setEditError(null)
+        try {
+            if (editingTodo) {
+                const updateRequest: UpdateTodoRequest = {
+                    title: editTitle,
+                    description: editDescription
+                };
+                await updateTodo(editingTodo.id, updateRequest)
+                loadTodos()
+                setEditingTodo(null)
+            }
+        } catch (error) {
+            console.error("Error updating todo:", error)
+            setEditError(error instanceof Error ? error.message : "An unknown error occurred.")
         }
     }
 
@@ -106,6 +133,15 @@ export function TodosView() {
                 </CardHeader>
 
                 <CardContent className="flex flex-col gap-4">
+                    {error && (
+                        <Alert variant="destructive" className="mt-2">
+                            <AlertCircle className='h-4 w-4' />
+                            <AlertDescription className='ml-2'>
+                                {error}
+                            </AlertDescription>
+
+                        </Alert>
+                    )}
                     <form className="flex flex-col gap-2" onSubmit={handleAddTodo}>
                         <Input placeholder="Task title" onChange={(e) => setNewTitle(e.target.value)} value={newTitle} />
                         <div className="flex gap-2">
@@ -211,6 +247,14 @@ export function TodosView() {
                         <DialogTitle>Edit todo</DialogTitle>
                         <DialogDescription>Update the title or description.</DialogDescription>
                     </DialogHeader>
+                    {editError && (
+                        <Alert variant="destructive" className="mt-2">
+                            <AlertCircle className='h-4 w-4' />
+                            <AlertDescription className='ml-2'>
+                                {editError}
+                            </AlertDescription>
+                        </Alert>
+                    )}
 
                     <form id="edit-form" className="flex flex-col gap-4" onSubmit={handleEditSubmit}>
                         <div className="grid gap-2">
